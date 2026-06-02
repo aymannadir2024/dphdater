@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DPH TOOLS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --primary-rgb: 37, 99, 235;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --code-bg: #f1f5f9;
+      --bg-gradient: linear-gradient(135deg, #f6f8fd 0%, #ffffff 100%);
+      --danger: #ef4444;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-rgb: 59, 130, 246;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --code-bg: #0f172a;
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --danger: #f87171;
+    }
+
+    * { box-sizing: border-box; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+
+    body {
+      margin: 0;
+      font-family: "Cairo", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ====== Header بسيط (حيت كان مستعمل فـ HTML) ====== */
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(8px);
+    }
+    [data-theme="dark"] header{
+      background: rgba(15,23,42,0.55);
+    }
+    .logo{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-weight:900;
+      font-size:18px;
+    }
+    .logo i{ color: var(--primary); }
+    .theme-switch{
+      cursor:pointer;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background: var(--surface);
+      user-select:none;
+      font-weight:800;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .panel-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
+    .panel-header i { color: var(--primary); font-size: 20px; }
+
+    label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-muted); font-size: 14px; }
+
+    input[type="date"], input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s;
+    }
+    input:focus { border-color: var(--primary); background: var(--card-bg); }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 15px; }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-main);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: "Cairo", sans-serif;
+      transition: 0.2s;
+    }
+    button:hover { transform: translateY(-2px); }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    }
+    button.primary:hover { opacity: 0.9; }
+
+    button.selected {
+      background: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .result-display {
+      margin-top: 20px;
+      background: rgba(var(--primary-rgb), 0.05);
+      border: 1px solid rgba(var(--primary-rgb), 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .result-date { font-size: 32px; font-weight: 900; color: var(--primary); margin: 5px 0; }
+
+    .status-badge {
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+    }
+
+    .file-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .file-head { font-weight: 800; color: var(--primary); display: flex; gap: 8px; align-items: center; }
+
+    .code-pill {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin: 3px;
+      font-family: monospace;
+      font-size: 28px;
+      color: var(--text-main);
+    }
+
+    /* نتائج Excel تسكرول داخل النصف */
+    #resultsArea{
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ====== رسالة انتهاء الصلاحية ====== */
+    .expired-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+    }
+    .expired-box{
+      width: min(700px, 100%);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      text-align: center;
+    }
+    .expired-box .t1{
+      font-size: 18px;
+      font-weight: 900;
+      margin: 0 0 6px 0;
+      color: var(--danger);
+    }
+    .expired-box .t2{
+      margin: 0;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .expired-box .t3{
+      margin: 10px 0 0 0;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .disabled{
+      pointer-events: none;
+      opacity: 0.35;
+      filter: grayscale(0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <i class="fas fa-layer-group"></i> HydroTools
+    </div>
+    <div class="theme-switch" id="themeToggle">
+      <i class="fas fa-moon"></i> <span>مظهر</span>
+    </div>
+  </header>
+
+  <!-- ✅ Overlay ديال انتهاء التاريخ -->
+  <div class="expired-overlay" id="expiredOverlay">
+    <div class="expired-box">
+      <p class="t1"><i class="fas fa-lock"></i> تم إيقاف الأداة</p>
+     
+      
+    </div>
+  </div>
+
+  <div class="main-grid" id="appRoot">
+
+    <div class="panel right-panel">
+      <div class="panel-header">
+        <i class="fas fa-calendar-check"></i>
+        <h2>مدة البحث العلني</h2>
+      </div>
+
+      <div>
+        <label>تاريخ الانطلاق</label>
+        <input type="date" id="datePicker"/>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <label>طريقة الإرسال</label>
+        <div class="btn-row">
+          <button id="btn1" onclick="calculateRange(16, 'إيداع مباشر', 1)">
+            <i class="fas fa-running"></i> مباشرة
+          </button>
+          <button id="btn2" onclick="calculateRange(23, 'عبر البريد', 2)">
+            <i class="fas fa-envelope-open-text"></i> البريد
+          </button>
+        </div>
+      </div>
+
+      <div id="dateResultContainer" class="result-display" style="display: none;">
+        <div style="font-size: 14px; opacity: 0.8;">الفترة القانونية:</div>
+        <div id="dateRange" class="result-date"></div>
+        <div id="methodLabel" style="font-weight: 700; color: var(--text-main); margin-top: 5px;"></div>
+      </div>
+    </div>
+
+    <div class="panel left-panel">
+      <div class="panel-header">
+        <i class="fas fa-search"></i>
+        <h2>البحث في  (Excel)</h2>
+      </div>
+
+      <div class="status-badge" id="status">
+        <i class="fas fa-info-circle"></i> بانتظار اختيار المجلد...
+      </div>
+
+      <div class="btn-row" style="margin-bottom: 20px;">
+        <button class="primary" id="pickFolderBtn"><i class="fas fa-folder-open"></i> اختيار مجلد</button>
+        <button id="reloadBtn"><i class="fas fa-sync-alt"></i> تحديث</button>
+      </div>
+
+      <div style="border-top: 1px dashed var(--border); margin: 10px 0 20px 0;"></div>
+
+      <label>أدخل الرقم للبحث</label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="query" placeholder="" />
+        <button class="primary" id="searchBtn" style="flex: 0 0 80px;"><i class="fas fa-search"></i></button>
+      </div>
+
+      <div id="excelResultMsg" style="margin-top: 15px;"></div>
+      <div id="resultsArea"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    © Hydroleader By YouNes | تم التصميم بعناية
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    
+    const EXPIRY_DATE = "2056-01-01"; 
+
+    function parseYMD(ymd){
+      const [y,m,d] = String(ymd).split("-").map(x => parseInt(x,10));
+      return new Date(y, (m||1)-1, d||1, 0,0,0,0); // local time
+    }
+
+    function isExpired(){
+      const expiryStartNextDay = parseYMD(EXPIRY_DATE);
+      expiryStartNextDay.setDate(expiryStartNextDay.getDate() + 1); // نهار من بعد expiration
+      return new Date() >= expiryStartNextDay;
+    }
+
+    function blockApp(){
+      const appRoot = document.getElementById("appRoot");
+      const overlay = document.getElementById("expiredOverlay");
+      const info = document.getElementById("expiredInfo");
+
+      const exp = parseYMD(EXPIRY_DATE);
+      const y = exp.getFullYear();
+      const m = ("0"+(exp.getMonth()+1)).slice(-2);
+      const d = ("0"+exp.getDate()).slice(-2);
+
+      info.textContent = "تاريخ الانتهاء: " + y + "/" + m + "/" + d;
+
+      if(appRoot) appRoot.classList.add("disabled");
+      if(overlay) overlay.style.display = "flex";
+    }
+
+    // إذا منتهي: وقف كلشي بكري
+    if(isExpired()){
+      window.addEventListener("DOMContentLoaded", () => {
+        blockApp();
+      });
+    }
+
+    // --- 1. Theme Switcher Logic ---
+    const toggleBtn = document.getElementById('themeToggle');
+    const htmlEl = document.documentElement;
+    const icon = toggleBtn.querySelector('i');
+
+    if(localStorage.getItem('theme') === 'dark'){
+      setTheme('dark');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if(isExpired()) return; // ✅ وقف
+      const current = htmlEl.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      setTheme(next);
+    });
+
+    function setTheme(mode) {
+      htmlEl.setAttribute('data-theme', mode);
+      localStorage.setItem('theme', mode);
+      if(mode === 'dark'){
+        icon.className = 'fas fa-sun';
+        icon.nextElementSibling.innerText = 'نهاري';
+      } else {
+        icon.className = 'fas fa-moon';
+        icon.nextElementSibling.innerText = 'ليلي';
+      }
+    }
+
+    // --- 2. Date Calculator Logic ---
+    (function() {
+      if(isExpired()) return; // ✅ وقف
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = ('0' + (today.getMonth() + 1)).slice(-2);
+      const d = ('0' + today.getDate()).slice(-2);
+      document.getElementById('datePicker').value = y + '-' + m + '-' + d;
+    })();
+
+    // ✅ yyyy/mm/dd
+    function formatDate(d) {
+      const y = d.getFullYear();
+      const m = ('0' + (d.getMonth() + 1)).slice(-2);
+      const day = ('0' + d.getDate()).slice(-2);
+      return y + '/' + m + '/' + day;
+    }
+
+    function calculateRange(offset, label, id) {
+      if(isExpired()) return; // ✅ وقف
+      const val = document.getElementById('datePicker').value;
+      if (!val) return;
+
+      const parts = val.split('-');
+      const selectedDate = new Date(parts[0], parseInt(parts[1]) - 1, parts[2]);
+
+      const start = new Date(selectedDate);
+      start.setDate(selectedDate.getDate() + offset);
+
+      const end = new Date(start);
+      end.setDate(start.getDate() + 9);
+
+      document.getElementById("dateRange").innerText = formatDate(start) + " ⬅ " + formatDate(end);
+      document.getElementById("methodLabel").innerText = "طريقة الإرسال: " + label;
+      document.getElementById("dateResultContainer").style.display = "block";
+
+      document.querySelectorAll('.btn-row button').forEach(b => b.classList.remove('selected'));
+      document.getElementById("btn" + id).classList.add('selected');
+    }
+
+    // --- 3. Excel Logic (FIXED) ---
+    function normalize(v){
+      if(v === null || v === undefined) return "";
+      // حيد المسافات الزايدة وخليها string
+      return String(v).replace(/\s+/g, " ").trim();
+    }
+
+    // إلا كان المستخدم داير - كنستعمل قبل - فقط (باش 2234-26 يقدر يطابق 2234-99 إذا بغيت)
+    // لكن: إذا المستخدم كتب / أو - فالغالب بغاها EXACT => نخليها exact.
+    function smartMatch(cellText, queryText){
+      const c = normalize(cellText);
+      const q = normalize(queryText);
+      if(!c || !q) return false;
+
+      const qHasSlashOrDash = /[\/-]/.test(q);
+      if(qHasSlashOrDash){
+        // EXACT match فحالات بحال 2025/2026 أو 2234-26
+        return c === q;
+      }
+
+      // فحالات الأرقام العادية: خذ قبل '-' من الطرفين
+      const keyBeforeDash = (s) => {
+        const t = normalize(s);
+        const idx = t.indexOf("-");
+        return (idx >= 0 ? t.slice(0, idx) : t).trim();
+      };
+
+      return keyBeforeDash(c) === keyBeforeDash(q);
+    }
+
+    // نجيب display من cell.w (formatted) وإلا cell.v
+    function cellToText(cell){
+      if(!cell) return "";
+      const v = (cell.w !== undefined && cell.w !== null) ? cell.w : cell.v;
+      return normalize(v);
+    }
+
+    const DB_NAME="excel_v2";
+    let filesData = [];   // [{name, entries:[{value, field, sheet}]}]
+    let dirHandle = null;
+
+    const statusEl = document.getElementById("status");
+    const resultsArea = document.getElementById("resultsArea");
+    const msgEl = document.getElementById("excelResultMsg");
+
+    function openDB(){
+      return new Promise((res,rej)=>{
+        const req=indexedDB.open(DB_NAME,1);
+        req.onupgradeneeded=()=>req.result.createObjectStore("kv");
+        req.onsuccess=()=>res(req.result);
+        req.onerror=()=>rej(req.error);
+      });
+    }
+
+    async function idbOp(type, key, val){
+      const db = await openDB();
+      return new Promise((res, rej)=>{
+        const tx = db.transaction("kv", type === 'put' ? "readwrite" : "readonly");
+        const store = tx.objectStore("kv");
+        const req = type === 'put' ? store.put(val, key) : store.get(key);
+        req.onsuccess = () => res(req.result);
+        req.onerror = () => rej(req.error);
+      });
+    }
+
+    async function processFolder() {
+      if(isExpired()) return; // ✅ وقف
+      if(!dirHandle) return;
+
+      const perm = await dirHandle.queryPermission({mode:"read"});
+      if(perm !== 'granted') {
+        if((await dirHandle.requestPermission({mode:"read"})) !== 'granted') {
+          statusEl.innerHTML = `<span style="color:var(--danger)">❌ تم رفض الصلاحية</span>`;
+          return;
+        }
+      }
+
+      statusEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جارٍ قراءة الملفات...`;
+      filesData = [];
+      let count = 0;
+
+      async function rec(handle) {
+        for await (const [name, h] of handle.entries()) {
+          if (h.kind === 'directory') await rec(h);
+
+          if (h.kind === 'file' && /\.(xlsx|xls)$/i.test(name)) {
+            try {
+              const file = await h.getFile();
+              const buf = await file.arrayBuffer();
+              const wb = XLSX.read(buf, { type:'array', cellText:true, cellDates:false });
+
+              const entries = []; // ✅ Array بدل Set (باش مايبقاش [object Object])
+
+              wb.SheetNames.forEach(sheetName => {
+                const sh = wb.Sheets[sheetName];
+                if(!sh || !sh['!ref']) return;
+
+                const range = XLSX.utils.decode_range(sh['!ref']);
+
+                // نجيب headers من الصف الأول (row = range.s.r)
+                const headerRow = range.s.r;
+
+                // حضّر headers per column
+                const headersByCol = {};
+                for(let c = range.s.c; c <= range.e.c; c++){
+                  const addr = XLSX.utils.encode_cell({r: headerRow, c});
+                  headersByCol[c] = cellToText(sh[addr]) || `عمود ${c+1}`;
+                }
+
+                // دوز على باقي الخلايا (من بعد headerRow)
+                for(let r = headerRow + 1; r <= range.e.r; r++){
+                  for(let c = range.s.c; c <= range.e.c; c++){
+                    const addr = XLSX.utils.encode_cell({r, c});
+                    const cell = sh[addr];
+                    if(!cell) continue;
+
+                    const text = cellToText(cell);
+                    if(!text) continue;
+
+                    entries.push({
+                      value: text,
+                      field: headersByCol[c] || `عمود ${c+1}`,
+                      sheet: sheetName
+                    });
+                  }
+                }
+              });
+
+              filesData.push({ name: name.replace(/\.[^/.]+$/, ""), entries });
+              count++;
+              statusEl.innerHTML = `جارٍ فهرسة الملف رقم ${count}...`;
+            } catch(e) {
+              console.error(e);
+            }
+          }
+        }
+      }
+
+      await rec(dirHandle);
+      statusEl.innerHTML = `<i class="fas fa-check-circle" style="color:var(--primary)"></i> تم فهرسة ${count} ملف بنجاح`;
+    }
+
+    document.getElementById("pickFolderBtn").addEventListener("click", async () => {
+      if(isExpired()) return; // ✅ وقف
+      try {
+        dirHandle = await window.showDirectoryPicker();
+        await idbOp('put', 'handle', dirHandle);
+        await processFolder();
+      } catch(e) { /* cancelled */ }
+    });
+
+    document.getElementById("reloadBtn").addEventListener("click", () => {
+      if(isExpired()) return; // ✅ وقف
+      processFolder();
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      if(isExpired()) return; // ✅ وقف
+      const q = normalize(document.getElementById("query").value);
+      resultsArea.innerHTML = "";
+      msgEl.innerHTML = "";
+
+      if(!q) return;
+
+      if(!filesData.length) {
+        msgEl.innerHTML = `<div style="color:red">يجب اختيار المجلد أولاً</div>`;
+        return;
+      }
+
+      let found = false;
+
+      filesData.forEach(file => {
+        const matches = file.entries.filter(e => smartMatch(e.value, q));
+
+        if(matches.length){
+          found = true;
+
+          // نجمع النتائج حسب الحقل (باش مايتكرروش بزاف)
+          const grouped = new Map(); // field -> array of values
+          matches.forEach(m => {
+            const key = m.field || "غير معروف";
+            if(!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key).push(m.value);
+          });
+
+          const card = document.createElement('div');
+          card.className = 'file-card';
+
+          card.innerHTML = `
+            <div class="file-head"><i class="fas fa-file-excel"></i> ${file.name}</div>
+            <div style="margin-top:10px">
+              ${
+                [...grouped.entries()].map(([field, vals]) => {
+                  // نعرض: الرقم ثم اسم الحقل
+                  // إذا لقا نفس الرقم عدة مرات فـ نفس الحقل، نخليها مرة وحدة
+                  const uniq = [...new Set(vals)];
+                  return uniq.map(v => `
+                    <div style="margin-top:6px">
+                      <span class="code-pill">${v}</span>
+                      <span class="code-pill">: ${field}</span>
+                    </div>
+                  `).join("");
+                }).join("")
+              }
+            </div>
+          `;
+          resultsArea.appendChild(card);
+        }
+      });
+
+      if(!found) {
+        msgEl.innerHTML = `<div style="padding:10px; background:rgba(255,0,0,0.1); border-radius:8px; color:red">لم يتم العثور على القيمة: ${q}</div>`;
+      } else {
+        msgEl.innerHTML = `<div style="padding:10px; background:rgba(0,255,0,0.1); border-radius:8px; color:green">✅ تم العثور على نتائج</div>`;
+      }
+    });
+
+    window.onload = async () => {
+      if(isExpired()) { blockApp(); return; } // ✅ وقف
+      const h = await idbOp('get', 'handle');
+      if(h) {
+        dirHandle = h;
+        statusEl.innerHTML = `وجدنا مجلداً محفوظاً. اضغط <b>تحديث</b> للفهرسة.`;
+      }
+    };
+
+    document.getElementById("query").addEventListener("keypress", (e) => {
+      if(isExpired()) return; // ✅ وقف
+      if(e.key === "Enter") document.getElementById("searchBtn").click();
+    });
+  </script>
+</body>
+</html>
